@@ -9,12 +9,16 @@ const links = [
   ['/admin/transfers', 'Transferts'],
   ['/admin/purchase-orders', 'Bons de commande'],
   ['/admin/inventory', 'Inventaires'],
+  ['/admin/sales', 'Vente comptoir'],
   ['/admin/orders', 'Commandes'],
   ['/admin/invoices', 'Factures'],
   ['/admin/credit-notes', 'Avoirs'],
   ['/admin/expenses', 'Dépenses'],
   ['/admin/suppliers', 'Fournisseurs'],
   ['/admin/users', 'Utilisateurs'],
+  ['/admin/reports', 'Rapports'],
+  ['/admin/stores', 'Boutiques'],
+  ['/admin/settings', 'Paramètres'],
   ['/admin/audit', 'Audit'],
 ]
 

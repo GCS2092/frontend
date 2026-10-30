@@ -12,6 +12,10 @@ const PurchaseOrders = lazy(() => import('./pages/PurchaseOrders'))
 const Inventory = lazy(() => import('./pages/Inventory'))
 const Invoices = lazy(() => import('./pages/Invoices'))
 const Orders = lazy(() => import('./pages/Orders'))
+const Sales = lazy(() => import('./pages/Sales'))
+const Reports = lazy(() => import('./pages/Reports'))
+const Stores = lazy(() => import('./pages/Stores'))
+const Settings = lazy(() => import('./pages/Settings'))
 const CreditNotes = lazy(() => import('./pages/CreditNotes'))
 const Expenses = lazy(() => import('./pages/Expenses'))
 const Suppliers = lazy(() => import('./pages/Suppliers'))
@@ -33,6 +37,10 @@ export default function App() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="sales" element={<Sales />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="stores" element={<Stores />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="credit-notes" element={<CreditNotes />} />
             <Route path="expenses" element={<Expenses />} />
             <Route path="suppliers" element={<Suppliers />} />
