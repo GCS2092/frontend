@@ -4,6 +4,7 @@ import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty } from '../components/ui'
 import DataTable from '../components/DataTable'
+import Pager from '../components/Pager'
 
 const ROLES = ['CUSTOMER', 'SELLER', 'STAFF', 'ADMIN']
 const STORE_ROLES = ['MANAGER', 'ACCOUNTANT', 'COMMERCIAL', 'WAREHOUSE', 'DELIVERY']
@@ -11,7 +12,8 @@ const EMPTY = { firstName: '', lastName: '', email: '', phone: '', password: '',
 
 export default function Users() {
   const { user: me, stores } = useAuth()
-  const u = useApi('/users/admin/all')
+  const [page, setPage] = useState(1)
+  const u = useApi('/users/admin/all', { page, limit: 50 })
   const [f, setF] = useState(EMPTY)
   const [msg, setMsg] = useState('')
   const list = rows(u.data)
@@ -69,6 +71,7 @@ export default function Users() {
           <button className="link" onClick={() => resetPwd(r)}>Mot de passe</button>
         </span>
       )} />
+      <Pager data={u.data} page={page} setPage={setPage} />
       <Empty list={list} />
     </div>
   )

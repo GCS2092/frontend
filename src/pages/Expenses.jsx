@@ -4,13 +4,15 @@ import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty } from '../components/ui'
 import DataTable from '../components/DataTable'
+import Pager from '../components/Pager'
 
 const CATS = ['STOCK_PURCHASE', 'SHIPPING', 'MARKETING', 'PACKAGING', 'SALARY', 'RENT', 'UTILITIES', 'OTHER']
 const today = () => new Date().toISOString().slice(0, 10)
 
 export default function Expenses() {
   const { storeId } = useAuth()
-  const ex = useApi('/admin/accounting/expenses', { storeId })
+  const [page, setPage] = useState(1)
+  const ex = useApi('/admin/accounting/expenses', { storeId, page, limit: 20 })
   const [f, setF] = useState({ label: '', amount: '', category: 'OTHER', date: today() })
   const [msg, setMsg] = useState('')
   const list = rows(ex.data)
@@ -37,6 +39,7 @@ export default function Expenses() {
       </form>
       <Loading on={ex.loading} />
       <DataTable list={list} actions={(r) => <button className="link" onClick={() => window.confirm('Supprimer cette dépense ?') && act(() => api.delete(`/admin/accounting/expenses/${r.id}`))}>Supprimer</button>} />
+      <Pager data={ex.data} page={page} setPage={setPage} />
       <Empty list={list} />
     </div>
   )
