@@ -75,7 +75,7 @@ export default function Sales() {
         <select value={f.paymentMethod} onChange={(e) => setF({ ...f, paymentMethod: e.target.value })}>
           {METHODS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
-        <input placeholder="Destination / compte de paiement" value={f.destination} onChange={(e) => setF({ ...f, destination: e.target.value })} />
+        <input placeholder="Destination (laisser vide si locale)" value={f.destination} onChange={(e) => setF({ ...f, destination: e.target.value })} />
         <strong>Total : {fmt(total)}</strong>
         <button>Valider la vente</button>
       </form>
