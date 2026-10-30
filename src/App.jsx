@@ -11,6 +11,8 @@ const Transfers = lazy(() => import('./pages/Transfers'))
 const PurchaseOrders = lazy(() => import('./pages/PurchaseOrders'))
 const Inventory = lazy(() => import('./pages/Inventory'))
 const Invoices = lazy(() => import('./pages/Invoices'))
+const Orders = lazy(() => import('./pages/Orders'))
+const CreditNotes = lazy(() => import('./pages/CreditNotes'))
 const Expenses = lazy(() => import('./pages/Expenses'))
 const Suppliers = lazy(() => import('./pages/Suppliers'))
 const Users = lazy(() => import('./pages/Users'))
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="purchase-orders" element={<PurchaseOrders />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="invoices" element={<Invoices />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="credit-notes" element={<CreditNotes />} />
             <Route path="expenses" element={<Expenses />} />
             <Route path="suppliers" element={<Suppliers />} />
             <Route path="users" element={<Users />} />
