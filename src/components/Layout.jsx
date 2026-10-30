@@ -8,6 +8,11 @@ const links = [
   ['/admin/transfers', 'Transferts'],
   ['/admin/purchase-orders', 'Bons de commande'],
   ['/admin/inventory', 'Inventaires'],
+  ['/admin/invoices', 'Factures'],
+  ['/admin/expenses', 'Dépenses'],
+  ['/admin/suppliers', 'Fournisseurs'],
+  ['/admin/users', 'Utilisateurs'],
+  ['/admin/audit', 'Audit'],
 ]
 
 export default function Layout() {

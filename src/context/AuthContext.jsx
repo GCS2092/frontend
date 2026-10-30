@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react'
-import api, { TOKEN_KEY, USER_KEY, STORES_KEY, STORE_KEY } from '../api/axios'
+import api, { bearer, TOKEN_KEY, USER_KEY, STORES_KEY, STORE_KEY } from '../api/axios'
 
 const Ctx = createContext(null)
 // eslint-disable-next-line react-refresh/only-export-components
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
   const setStoreId = (id) => { localStorage.setItem(STORE_KEY, id); setStoreIdState(id) }
 
   const logout = () => {
-    api.post('/auth/logout').catch(() => {})
+    api.post('/auth/logout', {}, bearer(localStorage.getItem(TOKEN_KEY))).catch(() => {})
     ;[TOKEN_KEY, USER_KEY, STORES_KEY, STORE_KEY].forEach((k) => localStorage.removeItem(k))
     setUser(null); setStores([]); setStoreIdState('')
   }

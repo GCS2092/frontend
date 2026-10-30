@@ -30,7 +30,19 @@ api.interceptors.response.use(
 
 export const errMsg = (e) => e.response?.data?.message || e.response?.data?.error || e.message || 'Erreur inattendue'
 export const bearer = (t) => ({ headers: { Authorization: `Bearer ${t}` } })
-export const rows = (d) => (Array.isArray(d) ? d : d?.data ?? d?.items ?? d?.products ?? [])
+export const rows = (d) => {
+  if (Array.isArray(d)) return d
+  if (d && typeof d === 'object') return d.data ?? d.items ?? d.products ?? Object.values(d).find(Array.isArray) ?? []
+  return []
+}
 export const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n ?? 0) + ' F'
 
 export default api
+
+export async function download(url, filename, params = {}) {
+  const r = await api.get(url, { params, responseType: 'blob' })
+  const href = URL.createObjectURL(r.data)
+  const a = document.createElement('a')
+  a.href = href; a.download = filename; a.click()
+  URL.revokeObjectURL(href)
+}

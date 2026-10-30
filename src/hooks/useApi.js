@@ -13,6 +13,7 @@ export function useApi(url, params = {}) {
       .catch((e) => setError(errMsg(e)))
       .finally(() => setLoading(false))
   }, [url, key])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { reload() }, [reload])
   return { data, error, loading, reload }
 }
