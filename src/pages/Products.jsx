@@ -28,6 +28,26 @@ const StatusPill = ({ value }) => {
   return s ? <span className={`badge ${s[1]}`}>{s[0]}</span> : <Badge>{value}</Badge>
 }
 
+const stockState = (p) => {
+  const s = Number(p.stock ?? 0)
+  if (s <= 0) return 'out'
+  return s <= Number(p.lowStockAlert ?? 5) ? 'low' : 'ok'
+}
+
+function StockCell({ p }) {
+  const s = Number(p.stock ?? 0)
+  const state = stockState(p)
+  const ref = Math.max(Number(p.lowStockAlert ?? 5) * 3, 1)
+  const pct = Math.min(100, Math.round((s / ref) * 100))
+  const color = state === 'out' ? 'var(--danger)' : state === 'low' ? 'var(--warning)' : 'var(--primary)'
+  return (
+    <div className="gauge">
+      <div className="gauge-bar"><i style={{ width: `${pct}%`, background: color }} /></div>
+      <span className={`gauge-n ${state}`}>{s}</span>
+    </div>
+  )
+}
+
 export default function Products() {
   const { storeId } = useAuth()
   const [input, setInput] = useState('')
@@ -37,6 +57,7 @@ export default function Products() {
   const [sorting, setSorting] = useState([])
   const [catName, setCatName] = useState('')
   const [catBusy, setCatBusy] = useState(false)
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(input.trim()), 300)
@@ -47,6 +68,12 @@ export default function Products() {
   const cats = useApi('/categories')
   const list = useMemo(() => rows(data), [data])
   const categories = rows(cats.data)
+  const counts = useMemo(() => {
+    const c = { all: list.length, ok: 0, low: 0, out: 0 }
+    list.forEach((p) => { c[stockState(p)] += 1 })
+    return c
+  }, [list])
+  const shown = useMemo(() => (filter === 'all' ? list : list.filter((p) => stockState(p) === filter)), [list, filter])
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema), defaultValues: EMPTY,
@@ -120,7 +147,7 @@ export default function Products() {
     },
     {
       accessorKey: 'stock', header: 'Stock', meta: { right: true },
-      cell: (i) => (Number(i.getValue()) <= 0 ? <span className="badge danger">{i.getValue() ?? 0}</span> : i.getValue()),
+      cell: (i) => <StockCell p={i.row.original} />,
     },
     { accessorKey: 'reservedStock', header: 'Réservé', meta: { right: true } },
     { accessorKey: 'status', header: 'Statut', cell: (i) => <StatusPill value={i.getValue()} /> },
@@ -137,7 +164,7 @@ export default function Products() {
   ], [])
 
   const table = useReactTable({
-    data: list, columns, state: { sorting }, onSortingChange: setSorting,
+    data: shown, columns, state: { sorting }, onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(), getSortedRowModel: getSortedRowModel(),
   })
 
@@ -154,7 +181,13 @@ export default function Products() {
           <Search size={15} />
           <input className="search" placeholder="Rechercher un produit…" value={input} onChange={(e) => setInput(e.target.value)} />
         </div>
-        <span className="small muted">{list.length} produit{list.length > 1 ? 's' : ''}</span>
+        <div className="fchips" role="group" aria-label="Filtrer par état du stock">
+          {[['all', 'Tous'], ['ok', 'En stock'], ['low', 'Stock faible'], ['out', 'Rupture']].map(([k, l]) => (
+            <button key={k} type="button" className={`fchip${filter === k ? ' on' : ''}`} onClick={() => setFilter(k)}>
+              {l} <span className="fchip-n">{counts[k]}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <Loading on={loading} />

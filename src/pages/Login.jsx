@@ -56,49 +56,62 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-wrap">
-      <div className="card auth-card">
-        <div className="auth-brand">
+    <div className="auth-split">
+      <aside className="auth-hero">
+        <div className="brand">
           <span className="brand-logo"><Boxes size={18} /></span>
           <div>SGB<small>Gestion de stock</small></div>
         </div>
-        <h1>Connexion</h1>
-        <p className="muted" style={{ marginTop: 0 }}>Accédez à votre espace de gestion.</p>
-        {error && <div className="alert" role="alert">{error}</div>}
-        {step === 'credentials' && (
-          <form onSubmit={submitCredentials}>
-            <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
-            <label>Mot de passe<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
-            <button disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</button>
-          </form>
-        )}
-        {step === 'setup' && (
-          <form onSubmit={submitEnable}>
-            <p>Scannez ce QR code avec Google Authenticator ou Authy, puis saisissez le code à 6 chiffres.</p>
-            {qr?.qrCodeDataUrl && <img src={qr.qrCodeDataUrl} alt="QR code 2FA" className="qr" />}
-            {qr?.manualEntryKey && <p className="muted">Clé manuelle : <code>{qr.manualEntryKey}</code></p>}
-            <label>Code<input inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} required autoFocus /></label>
-            <button disabled={busy}>{busy ? '...' : 'Activer'}</button>
-          </form>
-        )}
-        {step === 'verify' && (
-          <form onSubmit={submitVerify}>
-            <label>{useBackup ? 'Code de secours' : 'Code à 6 chiffres'}
-              <input value={code} onChange={(e) => setCode(e.target.value)} required autoFocus />
-            </label>
-            <button disabled={busy}>{busy ? '...' : 'Valider'}</button>
-            <button type="button" className="link" onClick={() => { setUseBackup(!useBackup); setCode('') }}>
-              {useBackup ? 'Utiliser le code de l’application' : 'Utiliser un code de secours'}
-            </button>
-          </form>
-        )}
-        {step === 'backup' && (
-          <div>
-            <p><strong>Conservez ces codes de secours.</strong> Ils ne seront plus affichés.</p>
-            <pre className="codes">{backupCodes.join('\n')}</pre>
-            <button onClick={() => navigate('/admin')}>J’ai noté mes codes, continuer</button>
-          </div>
-        )}
+        <div>
+          <h2>Votre stock, vos ventes et vos achats au même endroit.</h2>
+          <ul className="auth-points">
+            <li>Stock suivi par boutique, avec alertes de réapprovisionnement</li>
+            <li>Vente comptoir rapide, factures et avoirs</li>
+            <li>Bons de commande, fournisseurs et rapports</li>
+          </ul>
+        </div>
+        <small style={{ color: '#7b9b97' }}>Accès sécurisé par double authentification.</small>
+      </aside>
+      <div className="auth-pane">
+        <div className="card auth-card">
+          <h1>Connexion</h1>
+          <p className="muted" style={{ marginTop: 0 }}>Accédez à votre espace de gestion.</p>
+          {error && <div className="alert" role="alert">{error}</div>}
+          {step === 'credentials' && (
+            <form onSubmit={submitCredentials}>
+              <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
+              <label>Mot de passe<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
+              <button disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</button>
+            </form>
+          )}
+          {step === 'setup' && (
+            <form onSubmit={submitEnable}>
+              <p>Scannez ce QR code avec Google Authenticator ou Authy, puis saisissez le code à 6 chiffres.</p>
+              {qr?.qrCodeDataUrl && <img src={qr.qrCodeDataUrl} alt="QR code 2FA" className="qr" />}
+              {qr?.manualEntryKey && <p className="muted">Clé manuelle : <code>{qr.manualEntryKey}</code></p>}
+              <label>Code<input inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} required autoFocus /></label>
+              <button disabled={busy}>{busy ? '...' : 'Activer'}</button>
+            </form>
+          )}
+          {step === 'verify' && (
+            <form onSubmit={submitVerify}>
+              <label>{useBackup ? 'Code de secours' : 'Code à 6 chiffres'}
+                <input value={code} onChange={(e) => setCode(e.target.value)} required autoFocus />
+              </label>
+              <button disabled={busy}>{busy ? '...' : 'Valider'}</button>
+              <button type="button" className="link" onClick={() => { setUseBackup(!useBackup); setCode('') }}>
+                {useBackup ? 'Utiliser le code de l’application' : 'Utiliser un code de secours'}
+              </button>
+            </form>
+          )}
+          {step === 'backup' && (
+            <div>
+              <p><strong>Conservez ces codes de secours.</strong> Ils ne seront plus affichés.</p>
+              <pre className="codes">{backupCodes.join('\n')}</pre>
+              <button onClick={() => navigate('/admin')}>J’ai noté mes codes, continuer</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

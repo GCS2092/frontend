@@ -6,9 +6,9 @@ export default function Modal({ open, onOpenChange, title, description, children
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 animate-[fade-in_.15s_ease-out]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out]" />
         <Dialog.Content
-          className={`fixed left-1/2 top-1/2 z-50 w-[calc(100%-24px)] ${w} -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-surface p-5 text-text shadow-xl animate-[fade-in_.15s_ease-out] focus:outline-none`}
+          className={`fixed left-1/2 top-1/2 z-50 w-[calc(100%-24px)] ${w} -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-surface p-5 text-text shadow-xl animate-[fade-in_.15s_ease-out] focus:outline-none`}
         >
           <div className="flex items-start justify-between gap-4">
             <div>

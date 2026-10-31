@@ -3,7 +3,7 @@ import {
   Pie, PieChart, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area,
 } from 'recharts'
 
-export const PALETTE = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#65a30d']
+export const PALETTE = ['#0f766e', '#6366f1', '#d97706', '#c93a3a', '#0891b2', '#db2777', '#65a30d', '#7c3aed']
 
 const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 })
 export const shortNum = (v) => compact.format(Number(v) || 0)

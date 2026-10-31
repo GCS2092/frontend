@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   HelpCircle, LayoutDashboard, Package, Tags, ArrowLeftRight, Truck, ClipboardList, ClipboardCheck, ShoppingCart, ShoppingBag,
-  FileText, FileMinus, Wallet, Users, BarChart3, Store, Settings, ShieldCheck, Boxes, Menu, X, LogOut, Building2,
+  FileText, FileMinus, Wallet, Users, BarChart3, Store, Settings, ShieldCheck, Boxes, Menu, X, LogOut, Building2, Search,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import ThemeToggle from '../ui/ThemeToggle'
 import PageGuide from '../ui/PageGuide'
+import CommandPalette from '../ui/CommandPalette'
 import { tv } from '../ui/fr'
 import GlobalUI from '../ui/GlobalUI'
 
@@ -45,6 +46,7 @@ const groups = [
 export default function Layout() {
   const { user, stores, storeId, setStoreId, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const [palette, setPalette] = useState(false)
   const initials = `${(user.firstName || '')[0] || ''}${(user.lastName || '')[0] || ''}`
   return (
     <div className="shell">
@@ -78,6 +80,9 @@ export default function Layout() {
               {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
+          <button type="button" className="ghost search-trigger" aria-label="Recherche rapide" onClick={() => setPalette(true)}>
+            <Search size={15} /><span className="search-text">Aller à…</span><kbd>Ctrl K</kbd>
+          </button>
           <div className="spacer" />
           <PageGuide />
           <ThemeToggle />
@@ -95,6 +100,7 @@ export default function Layout() {
         <main className="main"><Outlet /></main>
         <GlobalUI />
       </div>
+      <CommandPalette open={palette} setOpen={setPalette} groups={groups} />
     </div>
   )
 }

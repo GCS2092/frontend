@@ -1,4 +1,5 @@
-import { Boxes, Tag, Percent, TrendingUp, Wallet, PiggyBank, Activity, AlertTriangle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Boxes, Tag, Percent, TrendingUp, Wallet, PiggyBank, Activity, AlertTriangle, ShoppingCart, Plus, ArrowRight } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { fmt } from '../api/axios'
@@ -14,10 +15,14 @@ const ICONS = {
   stockValue: Boxes, stockRetailValue: Tag, stockMargin: Percent,
   revenue: TrendingUp, totalExpenses: Wallet, netProfit: PiggyBank,
 }
+const TONES = {
+  stockValue: 'teal', stockRetailValue: 'indigo', stockMargin: 'cyan',
+  revenue: 'green', totalExpenses: 'amber', netProfit: 'rose',
+}
 const num = (v) => (typeof v === 'number' && isFinite(v) ? v : 0)
 
 export default function Dashboard() {
-  const { storeId } = useAuth()
+  const { storeId, user, stores } = useAuth()
   const { data, error, loading } = useApi('/admin/accounting/dashboard', { storeId })
   const d = data || {}
   const cards = Object.entries(d).filter(([, v]) => typeof v === 'number' || (typeof v === 'string' && v.length < 24 && v !== ''))
@@ -27,20 +32,44 @@ export default function Dashboard() {
   const stockCost = num(d.stockValue), stockRetail = num(d.stockRetailValue)
   const pct = (v) => (revenue > 0 ? Math.min(100, Math.max(0, (v / revenue) * 100)) : 0)
 
+  const hello = new Date().getHours() < 18 ? 'Bonjour' : 'Bonsoir'
+  const store = (stores || []).find((s) => String(s.id) === String(storeId))
+
   const resultData = [
-    { name: 'Dépenses', value: expenses, color: '#dc2626' },
-    { name: 'Résultat net', value: Math.max(profit, 0), color: '#16a34a' },
+    { name: 'Dépenses', value: expenses, color: '#d97706' },
+    { name: 'Résultat net', value: Math.max(profit, 0), color: '#0f766e' },
   ]
   const stockData = [
-    { name: 'Valeur d’achat', value: stockCost, color: '#2563eb' },
-    { name: 'Marge potentielle', value: Math.max(stockRetail - stockCost, 0), color: '#7c3aed' },
+    { name: 'Valeur d’achat', value: stockCost, color: '#0f766e' },
+    { name: 'Marge potentielle', value: Math.max(stockRetail - stockCost, 0), color: '#6366f1' },
   ]
   const lowBars = low.slice(0, 8).map((p) => ({ name: p.name, dispo: num(p.availableStock), seuil: num(p.lowStockAlert) }))
 
   return (
     <div>
-      <div className="page-head"><h1>Tableau de bord</h1></div>
+      <div className="page-head">
+        <div>
+          <h1>{hello}{user?.firstName ? `, ${user.firstName}` : ''}</h1>
+          <p className="page-sub">Voici l’état de {store ? `« ${store.name} »` : 'votre activité'}.</p>
+        </div>
+        <div className="row">
+          <Link to="/admin/products" className="btn-link ghost"><Plus size={16} /> Nouveau produit</Link>
+          <Link to="/admin/sales" className="btn-link"><ShoppingCart size={16} /> Nouvelle vente</Link>
+        </div>
+      </div>
       <Msg text={error} /><Loading on={loading} />
+
+      {!loading && low.length > 0 && (
+        <div className="banner" role="status">
+          <AlertTriangle size={18} />
+          <div>
+            <strong>{low.length} produit{low.length > 1 ? 's' : ''} sous le seuil d’alerte.</strong>{' '}
+            <span className="muted">Pensez à réapprovisionner.</span>
+          </div>
+          <Link to="/admin/purchase-orders" className="btn-link ghost sm">Bons de commande <ArrowRight size={14} /></Link>
+        </div>
+      )}
+
       <Onboarding />
 
       <div className="grid">
@@ -49,8 +78,8 @@ export default function Dashboard() {
           const money = typeof v === 'number' && /value|revenue|expense|profit|cost/i.test(k)
           const tone = k === 'netProfit' && typeof v === 'number' ? (v < 0 ? 'neg' : v > 0 ? 'pos' : '') : ''
           return (
-            <div className="card kpi" key={k}>
-              <div className="kpi-top"><span>{LABELS[k] || k}</span><Icon size={16} strokeWidth={1.75} /></div>
+            <div className="card kpi" key={k} data-tone={TONES[k] || 'teal'}>
+              <div className="kpi-top"><span>{LABELS[k] || k}</span><span className="kpi-ico"><Icon size={18} strokeWidth={1.75} /></span></div>
               <div className={`kpi-value ${tone}`}>{money ? fmt(v) : v}</div>
             </div>
           )
@@ -62,12 +91,12 @@ export default function Dashboard() {
           <div className="chart-head"><div className="chart-title">Du chiffre d’affaires au résultat</div>
             <div className="small muted">Part des dépenses et du résultat net par rapport au CA</div></div>
           <div className="split-bar" role="img" aria-label="Répartition du chiffre d’affaires">
-            <span style={{ width: `${pct(expenses)}%`, background: '#dc2626' }} />
-            <span style={{ width: `${pct(Math.max(profit, 0))}%`, background: '#16a34a' }} />
+            <span style={{ width: `${pct(expenses)}%`, background: '#d97706' }} />
+            <span style={{ width: `${pct(Math.max(profit, 0))}%`, background: '#0f766e' }} />
           </div>
           <ul className="legend inline">
-            <li><span className="dot" style={{ background: '#dc2626' }} />Dépenses · {fmt(expenses)} ({Math.round(pct(expenses))}%)</li>
-            <li><span className="dot" style={{ background: '#16a34a' }} />Résultat net · {fmt(profit)} ({Math.round(pct(Math.max(profit, 0)))}%)</li>
+            <li><span className="dot" style={{ background: '#d97706' }} />Dépenses · {fmt(expenses)} ({Math.round(pct(expenses))}%)</li>
+            <li><span className="dot" style={{ background: '#0f766e' }} />Résultat net · {fmt(profit)} ({Math.round(pct(Math.max(profit, 0)))}%)</li>
           </ul>
         </div>
       )}
@@ -79,7 +108,7 @@ export default function Dashboard() {
           <DonutCard title="Valeur du stock" subtitle="Coût d’achat et marge potentielle"
             data={stockData} format={fmt} centerLabel="Vente" centerValue={fmt(stockRetail)} />
           <HBarCard title="Stock bas" subtitle="Disponible vs seuil d’alerte" data={lowBars}
-            series={[{ key: 'dispo', name: 'Disponible', color: '#dc2626' }, { key: 'seuil', name: 'Seuil', color: '#9ca3af' }]} />
+            series={[{ key: 'dispo', name: 'Disponible', color: '#c93a3a' }, { key: 'seuil', name: 'Seuil', color: '#b5b2a6' }]} />
         </div>
       )}
 
@@ -87,14 +116,19 @@ export default function Dashboard() {
       {low.length === 0 ? <div className="empty">Rien à signaler.</div> : (
         <div className="table-wrap">
           <table className="dt">
-            <thead><tr><th>Produit</th><th className="r">Disponible</th><th className="r">Seuil</th></tr></thead>
-            <tbody>{low.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td className="r"><span className="badge danger">{p.availableStock}</span></td>
-                <td className="r">{p.lowStockAlert}</td>
-              </tr>
-            ))}</tbody>
+            <thead><tr><th>Produit</th><th className="r">Niveau</th><th className="r">Disponible</th><th className="r">Seuil</th></tr></thead>
+            <tbody>{low.map((p) => {
+              const seuil = num(p.lowStockAlert), dispo = num(p.availableStock)
+              const w = seuil > 0 ? Math.min(100, Math.round((dispo / seuil) * 100)) : 0
+              return (
+                <tr key={p.id}>
+                  <td><strong>{p.name}</strong></td>
+                  <td className="r"><div className="gauge"><div className="gauge-bar"><i style={{ width: `${w}%`, background: dispo <= 0 ? 'var(--danger)' : 'var(--warning)' }} /></div></div></td>
+                  <td className="r"><span className="badge danger">{p.availableStock}</span></td>
+                  <td className="r">{p.lowStockAlert}</td>
+                </tr>
+              )
+            })}</tbody>
           </table>
         </div>
       )}
