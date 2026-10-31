@@ -1,0 +1,22 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+}
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }

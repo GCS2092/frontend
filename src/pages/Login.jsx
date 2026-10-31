@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { Boxes } from 'lucide-react'
 import api, { bearer, errMsg } from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 
@@ -57,14 +58,18 @@ export default function Login() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card">
-        <h1>SGB</h1>
-        <p className="muted">Gestion de stock</p>
-        {error && <div className="alert">{error}</div>}
+        <div className="auth-brand">
+          <span className="brand-logo"><Boxes size={18} /></span>
+          <div>SGB<small>Gestion de stock</small></div>
+        </div>
+        <h1>Connexion</h1>
+        <p className="muted" style={{ marginTop: 0 }}>Accédez à votre espace de gestion.</p>
+        {error && <div className="alert" role="alert">{error}</div>}
         {step === 'credentials' && (
           <form onSubmit={submitCredentials}>
             <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
             <label>Mot de passe<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
-            <button disabled={busy}>{busy ? '...' : 'Se connecter'}</button>
+            <button disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</button>
           </form>
         )}
         {step === 'setup' && (

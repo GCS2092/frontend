@@ -21,6 +21,8 @@ const Expenses = lazy(() => import('./pages/Expenses'))
 const Suppliers = lazy(() => import('./pages/Suppliers'))
 const Users = lazy(() => import('./pages/Users'))
 const Audit = lazy(() => import('./pages/Audit'))
+const Help = lazy(() => import('./pages/Help'))
+const Categories = lazy(() => import('./pages/Categories'))
 
 export default function App() {
   return (
@@ -46,6 +48,8 @@ export default function App() {
             <Route path="suppliers" element={<Suppliers />} />
             <Route path="users" element={<Users />} />
             <Route path="audit" element={<Audit />} />
+            <Route path="help" element={<Help />} />
+            <Route path="categories" element={<Categories />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />
