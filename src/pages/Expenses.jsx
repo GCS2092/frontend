@@ -62,7 +62,7 @@ export default function Expenses() {
   return (
     <div>
       <div className="page-head">
-        <h1>Dépenses</h1>
+        <div><h1>Dépenses</h1><p className="page-sub">Charges de la boutique sélectionnée.</p></div>
         <button type="button" onClick={openCreate}><Plus size={16} /> Nouvelle dépense</button>
       </div>
       <Msg text={ex.error} /><Loading on={ex.loading} />

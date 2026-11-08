@@ -44,7 +44,7 @@ export default function Suppliers() {
   return (
     <div>
       <div className="page-head">
-        <h1>Fournisseurs</h1>
+        <div><h1>Fournisseurs</h1><p className="page-sub">Contacts utilisés pour les bons de commande.</p></div>
         <button type="button" onClick={openCreate}><Plus size={16} /> Nouveau fournisseur</button>
       </div>
       <Msg text={sp.error} /><Loading on={sp.loading} />

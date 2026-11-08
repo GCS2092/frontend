@@ -3,6 +3,8 @@ import api, { errMsg, rows } from '../api/axios'
 import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty } from '../components/ui'
+import { toast, confirmDialog } from '../ui/feedback'
+import { tv } from '../ui/fr'
 import DataTable from '../components/DataTable'
 import Pager from '../components/Pager'
 
@@ -18,7 +20,7 @@ export default function Users() {
   const [msg, setMsg] = useState('')
   const list = rows(u.data)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const act = async (fn, ok) => { setMsg(''); try { await fn(); if (ok) setMsg(ok); u.reload() } catch (e) { setMsg(errMsg(e)) } }
+  const act = async (fn, ok) => { setMsg(''); try { await fn(); if (ok) toast.success(ok); u.reload() } catch (e) { setMsg(errMsg(e)) } }
 
   const create = (e) => {
     e.preventDefault()
@@ -32,9 +34,10 @@ export default function Users() {
       setF(EMPTY)
     }, 'Compte créé.')
   }
-  const changeRole = (r, role) => {
+  const changeRole = async (r, role) => {
     if (r.id === me.id) return setMsg('Vous ne pouvez pas changer votre propre rôle.')
-    if (window.confirm(`Passer ${r.email} en ${role} ?`)) act(() => api.put(`/users/admin/${r.id}/role`, { role }), 'Rôle modifié.')
+    const ok = await confirmDialog({ title: `Passer ${r.email} en ${tv(role)} ?`, message: 'Le rôle s’applique à la prochaine connexion.', confirmLabel: 'Changer le rôle' })
+    if (ok) act(() => api.put(`/users/admin/${r.id}/role`, { role }), 'Rôle modifié.')
   }
   const resetPwd = (r) => {
     const p = window.prompt(`Nouveau mot de passe pour ${r.email} (10 caractères min.)`)
@@ -45,7 +48,7 @@ export default function Users() {
 
   return (
     <div>
-      <h1>Utilisateurs</h1>
+      <div className="page-head"><div><h1>Utilisateurs</h1><p className="page-sub">Comptes du personnel et rôles.</p></div></div>
       <Msg text={u.error || msg} />
       <form className="card row" onSubmit={create}>
         <input placeholder="Prénom" value={f.firstName} onChange={set('firstName')} required />
@@ -58,7 +61,7 @@ export default function Users() {
           {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
         <select value={f.storeRole} onChange={set('storeRole')}>
-          {STORE_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+          {STORE_ROLES.map((r) => <option key={r} value={r}>{tv(r)}</option>)}
         </select>
         <button>Créer le compte</button>
       </form>
@@ -66,7 +69,7 @@ export default function Users() {
       <DataTable list={list} actions={(r) => (
         <span className="row">
           <select value={r.role} onChange={(e) => changeRole(r, e.target.value)}>
-            {ROLES.map((x) => <option key={x} value={x}>{x}</option>)}
+            {ROLES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
           </select>
           <button className="link" onClick={() => resetPwd(r)}>Mot de passe</button>
         </span>

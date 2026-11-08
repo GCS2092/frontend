@@ -33,8 +33,11 @@ export const VALS = {
   CASH_ON_DELIVERY: 'Espèces / livraison', MOBILE_MONEY: 'Mobile money', CASH: 'Espèces', CARD: 'Carte', TRANSFER: 'Virement',
   STOCK_PURCHASE: 'Achat de stock', SHIPPING: 'Livraison', MARKETING: 'Marketing', PACKAGING: 'Emballage',
   SALARY: 'Salaires', RENT: 'Loyer', UTILITIES: 'Charges', OTHER: 'Autre',
-  IN: 'Entrée', OUT: 'Sortie', ENTRY: 'Entrée', EXIT: 'Sortie', ADJUSTMENT: 'Ajustement', SALE: 'Vente',
+  IN: 'Entrée', OUT: 'Sortie', ENTRY: 'Entrée', EXIT: 'Sortie', ADJUSTMENT: 'Ajustement (+)', ADJUSTMENT_OUT: 'Ajustement (−)', SALE: 'Vente',
+  OUT_SALE: 'Vente', OUT_LOSS: 'Perte / casse', OUT_RETURN: 'Retour fournisseur', RETURN_IN: 'Retour client',
+  TRANSFER_OUT: 'Transfert sortant', TRANSFER_IN: 'Transfert entrant',
   PURCHASE: 'Achat', RETURN: 'Retour', LOSS: 'Perte', DAMAGE: 'Casse', DAMAGED: 'Endommagé', GAIN: 'Gain',
+  GENERATED: 'Générée', ACCOUNTANT: 'Comptable', COMMERCIAL: 'Commercial', WAREHOUSE: 'Magasin', DELIVERY: 'Livraison',
   CREATE: 'Création', UPDATE: 'Modification', DELETE: 'Suppression', LOGIN: 'Connexion', LOGOUT: 'Déconnexion',
 }
 

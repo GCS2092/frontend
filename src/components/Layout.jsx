@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import ThemeToggle from '../ui/ThemeToggle'
 import PageGuide from '../ui/PageGuide'
+import NotificationBell from '../ui/NotificationBell'
 import CommandPalette from '../ui/CommandPalette'
 import { tv } from '../ui/fr'
 import GlobalUI from '../ui/GlobalUI'
@@ -28,6 +29,7 @@ const groups = [
   ]],
   ['Achats', [
     ['/admin/purchase-orders', 'Bons de commande', ClipboardList],
+    ['/admin/replenishment', 'Réapprovisionnement', Boxes],
     ['/admin/suppliers', 'Fournisseurs', Building2],
   ]],
   ['Finance', [
@@ -84,6 +86,7 @@ export default function Layout() {
             <Search size={15} /><span className="search-text">Aller à…</span><kbd>Ctrl K</kbd>
           </button>
           <div className="spacer" />
+          <NotificationBell />
           <PageGuide />
           <ThemeToggle />
           <div className="user-chip">

@@ -23,6 +23,7 @@ const Users = lazy(() => import('./pages/Users'))
 const Audit = lazy(() => import('./pages/Audit'))
 const Help = lazy(() => import('./pages/Help'))
 const Categories = lazy(() => import('./pages/Categories'))
+const Replenishment = lazy(() => import('./pages/Replenishment'))
 
 export default function App() {
   return (
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="audit" element={<Audit />} />
             <Route path="help" element={<Help />} />
             <Route path="categories" element={<Categories />} />
+            <Route path="replenishment" element={<Replenishment />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />

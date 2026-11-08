@@ -12,6 +12,7 @@ const METHODS = [
 ]
 const lineKey = (l) => `${l.productId}|${l.variantId || ''}`
 const EMPTY = { guestName: '', guestPhone: '', paymentMethod: 'CASH_ON_DELIVERY', destination: '' }
+const eq = (a, b) => a && String(a).trim().toLowerCase() === b
 
 export default function Sales() {
   const { storeId } = useAuth()
@@ -32,12 +33,24 @@ export default function Sales() {
   const count = cart.reduce((s, l) => s + l.quantity, 0)
 
   const add = (p, v = null) => {
-    const line = { productId: p.id, variantId: v?.id || null, name: p.name + (v ? ` (${v.size}/${v.color})` : ''), price: p.price, quantity: 1 }
-    setCart((c) => c.some((x) => lineKey(x) === lineKey(line))
-      ? c.map((x) => (lineKey(x) === lineKey(line) ? { ...x, quantity: x.quantity + 1 } : x))
-      : [...c, line])
+    const avail = v ? v.available : p.available
+    const max = typeof avail === 'number' ? avail : null
+    const line = { productId: p.id, variantId: v?.id || null, name: p.name + (v ? ` (${v.size}/${v.color})` : ''), price: p.price, quantity: 1, max }
+    const have = cart.find((x) => lineKey(x) === lineKey(line))?.quantity || 0
+    if (max !== null && have + 1 > max) {
+      return toast.error(max <= 0 ? 'Rupture de stock pour cet article.' : `Stock disponible : ${max}.`)
+    }
+    setCart((c) => (c.some((x) => lineKey(x) === lineKey(line))
+      ? c.map((x) => (lineKey(x) === lineKey(line) ? { ...x, quantity: x.quantity + 1, max } : x))
+      : [...c, line]))
   }
-  const setQty = (k, n) => setCart((c) => c.map((x) => (lineKey(x) === k ? { ...x, quantity: Math.max(1, Number(n) || 1) } : x)))
+  const setQty = (k, n) => {
+    const line = cart.find((x) => lineKey(x) === k)
+    if (!line) return
+    let qn = Math.max(1, Math.floor(Number(n)) || 1)
+    if (line.max != null && qn > line.max) { qn = Math.max(1, line.max); toast.error(`Stock disponible : ${line.max}.`) }
+    setCart((c) => c.map((x) => (lineKey(x) === k ? { ...x, quantity: qn } : x)))
+  }
   const remove = (k) => setCart((c) => c.filter((x) => lineKey(x) !== k))
 
   const clear = async () => {
@@ -45,12 +58,26 @@ export default function Sales() {
     if (ok) setCart([])
   }
 
-  // Entrée avec un seul résultat sans variante = ajout direct (pratique avec une douchette)
-  const onSearchKey = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      if (products.length === 1 && !products[0].variants?.length) { add(products[0]); setQ('') }
-    }
+  // Entrée = lecture douchette : code-barres / SKU exact (produit ou variante), sinon résultat unique
+  const onSearchKey = async (e) => {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+    const term = q.trim()
+    if (!term) return
+    try {
+      const { data } = await api.get('/admin/orders/search/products', { params: { storeId, q: term } })
+      const list = rows(data)
+      const t = term.toLowerCase()
+      for (const p of list) {
+        const v = p.variants?.find((x) => eq(x.barcode, t) || eq(x.sku, t))
+        if (v) { add(p, v); setQ(''); return }
+      }
+      const exact = list.find((p) => !p.variants?.length && (eq(p.barcode, t) || eq(p.sku, t)))
+      if (exact) { add(exact); setQ(''); return }
+      if (list.length === 1 && !list[0].variants?.length) { add(list[0]); setQ(''); return }
+      if (!list.length) toast.error('Aucun article pour ce code.')
+      else if (list.length === 1) toast.error('Choisissez la variante dans la liste.')
+    } catch (er) { toast.error(errMsg(er)) }
   }
 
   const submit = async (e) => {
@@ -70,13 +97,13 @@ export default function Sales() {
       setCart([]); setF({ ...EMPTY, paymentMethod: f.paymentMethod })
       toast.success(`Vente enregistrée — commande ${data.orderNumber || ''}`.trim())
       found.reload?.()
-    } catch (er) { toast.error(errMsg(er)) }
+    } catch (er) { toast.error(errMsg(er)); found.reload?.() }
     finally { setBusy(false) }
   }
 
   return (
     <div>
-      <div className="page-head"><h1>Vente comptoir</h1></div>
+      <div className="page-head"><div><h1>Vente comptoir</h1><p className="page-sub">Encaissez pour la boutique sélectionnée. Scannez un code-barres (ou tapez un SKU) puis Entrée pour ajouter l’article.</p></div></div>
       <Msg text={found.error} />
 
       <div className="pos">
@@ -84,7 +111,7 @@ export default function Sales() {
           <div className="toolbar">
             <div className="search-box" style={{ maxWidth: 420 }}>
               <Search size={15} />
-              <input className="search" placeholder="Rechercher un produit…" value={q}
+              <input className="search" placeholder="Nom, SKU ou code-barres…" value={q}
                 onChange={(e) => setQ(e.target.value)} onKeyDown={onSearchKey} autoFocus />
             </div>
             <span className="small muted">{products.length} résultat{products.length > 1 ? 's' : ''}</span>
@@ -95,12 +122,20 @@ export default function Sales() {
               <div className="prod" key={p.id}>
                 <div className="prod-name">{p.name}</div>
                 <div className="prod-price">{fmt(p.price)}</div>
+                {typeof p.available === 'number' && (
+                  <div className="small" style={{ color: p.available <= 0 ? 'var(--danger)' : undefined }}>
+                    {p.available <= 0 ? 'Rupture' : `Dispo : ${p.available}`}
+                  </div>
+                )}
                 <div className="prod-actions">
                   {p.variants?.length
                     ? p.variants.map((v) => (
-                      <button type="button" key={v.id} className="ghost chip" onClick={() => add(p, v)}>{v.size}/{v.color}</button>
+                      <button type="button" key={v.id} className="ghost chip" disabled={v.available <= 0}
+                        title={typeof v.available === 'number' ? `Disponible : ${v.available}` : undefined} onClick={() => add(p, v)}>
+                        {v.size}/{v.color}{typeof v.available === 'number' ? ` · ${v.available}` : ''}
+                      </button>
                     ))
-                    : <button type="button" className="ghost chip" onClick={() => add(p)}><Plus size={14} /> Ajouter</button>}
+                    : <button type="button" className="ghost chip" disabled={p.available <= 0} onClick={() => add(p)}><Plus size={14} /> Ajouter</button>}
                 </div>
               </div>
             ))}
@@ -127,7 +162,7 @@ export default function Sales() {
                     <div className="cart-line-bottom">
                       <div className="stepper">
                         <button type="button" className="ghost icon-btn" aria-label="Moins" onClick={() => setQty(k, l.quantity - 1)}><Minus size={14} /></button>
-                        <input className="qty-input" type="number" min="1" value={l.quantity} onChange={(e) => setQty(k, e.target.value)} />
+                        <input className="qty-input" type="number" min="1" max={l.max ?? undefined} value={l.quantity} onChange={(e) => setQty(k, e.target.value)} />
                         <button type="button" className="ghost icon-btn" aria-label="Plus" onClick={() => setQty(k, l.quantity + 1)}><Plus size={14} /></button>
                       </div>
                       <span className="muted small">{fmt(l.price)} ×</span>

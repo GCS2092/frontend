@@ -3,6 +3,7 @@ import api, { errMsg, rows, fmt } from '../api/axios'
 import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty, Badge } from '../components/ui'
+import { toast, confirmDialog } from '../ui/feedback'
 
 const EMPTY = { invoiceId: '', amount: '', reason: '', restoreStock: false }
 
@@ -26,16 +27,21 @@ export default function CreditNotes() {
     if (!picked) return setMsg('Choisissez une facture.')
     const amount = Number(f.amount)
     if (!Number.isInteger(amount) || amount <= 0 || amount > picked.total) return setMsg(`Montant invalide (1 à ${picked.total}).`)
-    if (!window.confirm(`Émettre un avoir de ${fmt(amount)} sur ${picked.invoiceNumber} ?\nLa facture sera ANNULÉE${f.restoreStock ? ' et le stock sera remis en vente' : ''}. Action irréversible.`)) return
+    const ok = await confirmDialog({
+      title: `Émettre un avoir de ${fmt(amount)} ?`,
+      message: `Facture ${picked.invoiceNumber}. Elle sera annulée${f.restoreStock ? ' et le stock remis en vente' : ''}. Action irréversible.`,
+      danger: true, confirmLabel: 'Émettre l’avoir',
+    })
+    if (!ok) return
     try {
       await api.post('/admin/credit-notes', { invoiceId: f.invoiceId, amount, reason: f.reason, restoreStock: f.restoreStock })
-      setF(EMPTY); setMsg('Avoir émis.'); cn.reload(); inv.reload()
+      setF(EMPTY); toast.success('Avoir émis.'); cn.reload(); inv.reload()
     } catch (er) { setMsg(errMsg(er)) }
   }
 
   return (
     <div>
-      <h1>Avoirs</h1>
+      <div className="page-head"><div><h1>Avoirs</h1><p className="page-sub">Un avoir annule la facture choisie.</p></div></div>
       <Msg text={cn.error || msg} />
       <form className="card row" onSubmit={create}>
         <select value={f.invoiceId} onChange={(e) => pick(e.target.value)} required>
@@ -51,7 +57,7 @@ export default function CreditNotes() {
         <button>Émettre l’avoir</button>
       </form>
       <Loading on={cn.loading} />
-      <table>
+      <div className="table-wrap"><table className="dt">
         <thead><tr><th>N°</th><th>Date</th><th>Facture</th><th>Commande</th><th>Montant</th><th>Motif</th><th>Statut</th></tr></thead>
         <tbody>{list.map((r) => (
           <tr key={r.id}>
@@ -64,7 +70,7 @@ export default function CreditNotes() {
             <td><Badge>{r.status}</Badge></td>
           </tr>
         ))}</tbody>
-      </table>
+      </table></div>
       <Empty list={list} />
     </div>
   )

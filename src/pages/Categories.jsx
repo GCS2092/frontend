@@ -46,7 +46,7 @@ export default function Categories() {
   return (
     <div>
       <div className="page-head">
-        <h1>Catégories</h1>
+        <div><h1>Catégories</h1><p className="page-sub">Regroupez les produits pour les retrouver plus vite.</p></div>
         <button type="button" onClick={openCreate}><Plus size={16} /> Nouvelle catégorie</button>
       </div>
       <Msg text={error} /><Loading on={loading} />

@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { FileSpreadsheet } from 'lucide-react'
 import { download, errMsg, rows, fmt } from '../api/axios'
 import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty, Badge } from '../components/ui'
 import Pager from '../components/Pager'
+import { tv } from '../ui/fr'
 
 const STATUSES = ['GENERATED', 'SENT', 'PAID', 'CANCELLED']
 
@@ -35,19 +37,24 @@ export default function Invoices() {
 
   return (
     <div>
-      <h1>Factures</h1>
+      <div className="page-head">
+        <div>
+          <h1>Factures</h1>
+          <p className="page-sub">Consultation et export de la boutique sélectionnée.</p>
+        </div>
+      </div>
       <Msg text={inv.error || msg} />
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="toolbar">
         <input className="search" style={{ margin: 0 }} placeholder="N° facture, commande, client…" value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }}>
           <option value="">Tous les statuts</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
         </select>
-        <button onClick={() => get('/admin/invoices/export/excel', 'factures.xlsx')}>Exporter en Excel</button>
+        <button type="button" onClick={() => get('/admin/invoices/export/excel', 'factures.xlsx')}><FileSpreadsheet size={16} /> Exporter en Excel</button>
       </div>
       <Loading on={inv.loading} />
-      <table>
+      <div className="table-wrap"><table className="dt">
         <thead><tr><th>N°</th><th>Date</th><th>Commande</th><th>Client</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
         <tbody>{list.map((r) => {
           const a = amountOf(r)
@@ -63,7 +70,7 @@ export default function Invoices() {
             </tr>
           )
         })}</tbody>
-      </table>
+      </table></div>
       <Pager data={inv.data} page={page} setPage={setPage} />
       <Empty list={list} />
     </div>

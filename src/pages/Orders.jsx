@@ -4,6 +4,8 @@ import { useApi } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { Msg, Loading, Empty, Badge } from '../components/ui'
 import Pager from '../components/Pager'
+import { tv } from '../ui/fr'
+import { toast, confirmDialog } from '../ui/feedback'
 
 const STATUSES = ['DRAFT', 'PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
 const clientOf = (o) => {
@@ -19,7 +21,6 @@ export default function Orders() {
   const [status, setStatus] = useState('')
   const [todo, setTodo] = useState(false)
   const [open, setOpen] = useState('')
-  const [msg, setMsg] = useState('')
   const o = useApi('/admin/orders', {
     storeId, page, limit: 20,
     search: search || undefined, status: status || undefined, view: todo ? 'todo' : undefined,
@@ -27,18 +28,21 @@ export default function Orders() {
   const list = rows(o.data)
 
   const act = async (fn, ok) => {
-    setMsg('')
-    try { await fn(); if (ok) setMsg(ok); o.reload() } catch (e) { setMsg(errMsg(e)) }
+    try { await fn(); if (ok) toast.success(ok); o.reload() } catch (e) { toast.error(errMsg(e)) }
   }
-  const confirmDraft = (r) => window.confirm(`Confirmer la commande ${r.orderNumber} ?`) &&
-    act(() => api.patch(`/admin/orders/${r.id}/confirm-draft`, {}), 'Commande confirmée.')
+  const confirmDraft = async (r) => {
+    const ok = await confirmDialog({ title: `Confirmer ${r.orderNumber} ?`, message: 'La réservation de stock sera confirmée.', confirmLabel: 'Confirmer' })
+    if (ok) act(() => api.patch(`/admin/orders/${r.id}/confirm-draft`, {}), 'Commande confirmée.')
+  }
   const rejectDraft = (r) => {
     const reason = window.prompt('Motif du rejet (optionnel)')
     if (reason === null) return
     act(() => api.patch(`/admin/orders/${r.id}/reject-draft`, { reason }), 'Commande rejetée, stock libéré.')
   }
-  const markPaid = (r) => window.confirm(`Marquer ${r.orderNumber} comme payée (${fmt(r.total)}) ?`) &&
-    act(() => api.patch(`/admin/orders/${r.id}/payment`, { paymentStatus: 'PAID' }), 'Paiement validé.')
+  const markPaid = async (r) => {
+    const ok = await confirmDialog({ title: `Marquer ${r.orderNumber} comme payée ?`, message: `Montant : ${fmt(r.total)}. Une facture sera émise.`, confirmLabel: 'Valider le paiement' })
+    if (ok) act(() => api.patch(`/admin/orders/${r.id}/payment`, { paymentStatus: 'PAID' }), 'Paiement validé.')
+  }
   const rejectPay = (r) => {
     const note = window.prompt('Motif du rejet du paiement')
     if (note === null) return
@@ -47,20 +51,25 @@ export default function Orders() {
 
   return (
     <div>
-      <h1>Commandes</h1>
-      <Msg text={o.error || msg} />
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="page-head">
+        <div>
+          <h1>Commandes</h1>
+          <p className="page-sub">Suivi, confirmation et encaissement.</p>
+        </div>
+      </div>
+      <Msg text={o.error} />
+      <div className="toolbar">
         <input className="search" style={{ margin: 0 }} placeholder="N° commande, client…" value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }}>
           <option value="">Tous les statuts</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
         </select>
-        <button className={todo ? '' : 'ghost'} style={todo ? {} : { color: '#111827', borderColor: '#9ca3af' }}
-          onClick={() => { setTodo(!todo); setPage(1) }}>{todo ? '✓ À traiter' : 'À traiter'}</button>
+        <button type="button" className={`ghost${todo ? ' on' : ''}`}
+          onClick={() => { setTodo(!todo); setPage(1) }}>{todo ? 'À traiter (actif)' : 'À traiter'}</button>
       </div>
       <Loading on={o.loading} />
-      <table>
+      <div className="table-wrap"><table className="dt">
         <thead><tr><th>N°</th><th>Date</th><th>Client</th><th>Boutique</th><th>Total</th><th>Statut</th><th>Paiement</th><th>Expire</th><th></th></tr></thead>
         <tbody>{list.map((r) => (
           <Fragment key={r.id}>
@@ -97,14 +106,14 @@ export default function Orders() {
                 {(r.statusHistory || []).length > 0 && <>
                   <strong>Historique</strong>
                   <ul>{r.statusHistory.map((h) => (
-                    <li key={h.id} className="small">{dt(h.createdAt)} : {h.fromStatus} → {h.toStatus} {h.message || ''} {h.reason ? `(${h.reason})` : ''}</li>
+                    <li key={h.id} className="small">{dt(h.createdAt)} : {tv(h.fromStatus) || '—'} → {tv(h.toStatus)} {h.message || ''} {h.reason ? `(${h.reason})` : ''}</li>
                   ))}</ul>
                 </>}
               </td></tr>
             )}
           </Fragment>
         ))}</tbody>
-      </table>
+      </table></div>
       <Pager data={o.data} page={page} setPage={setPage} />
       <Empty list={list} />
     </div>

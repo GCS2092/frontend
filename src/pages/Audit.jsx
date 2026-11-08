@@ -14,10 +14,12 @@ export default function Audit() {
   const list = rows(a.data)
   return (
     <div>
-      <h1>Journal d’audit</h1>
+      <div className="page-head"><div><h1>Journal d’audit</h1><p className="page-sub">Qui a fait quoi, sur la boutique sélectionnée.</p></div></div>
       <Msg text={a.error} />
-      <input className="search" placeholder="Rechercher (action, module, id)…" value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
+      <div className="toolbar">
+        <input className="search" style={{ margin: 0 }} placeholder="Rechercher (action, module, id)…" value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
+      </div>
       <Loading on={a.loading} />
       <DataTable list={list} max={9} />
       <Pager data={a.data} page={page} setPage={setPage} />

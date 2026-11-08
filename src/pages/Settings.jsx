@@ -2,6 +2,7 @@ import { useState } from 'react'
 import api, { errMsg } from '../api/axios'
 import { useApi } from '../hooks/useApi'
 import { Msg, Loading } from '../components/ui'
+import { toast } from '../ui/feedback'
 
 const GROUPS = [
   ['Entreprise', [['company_name', 'Nom'], ['company_address', 'Adresse'], ['company_phone', 'Téléphone'], ['company_email', 'Email']]],
@@ -23,12 +24,12 @@ export default function Settings() {
   const val = (k) => edit[k] ?? base[k] ?? ''
   const save = async (e) => {
     e.preventDefault(); setMsg('')
-    if (!Object.keys(edit).length) return setMsg('Aucune modification.')
-    try { await api.put('/settings', edit); setEdit({}); setMsg('Paramètres enregistrés.'); s.reload() } catch (er) { setMsg(errMsg(er)) }
+    if (!Object.keys(edit).length) return toast.error('Aucune modification.')
+    try { await api.put('/settings', edit); setEdit({}); toast.success('Paramètres enregistrés.'); s.reload() } catch (er) { setMsg(errMsg(er)) }
   }
   return (
     <div>
-      <h1>Paramètres</h1>
+      <div className="page-head"><div><h1>Paramètres</h1><p className="page-sub">Identité de l’entreprise, paiements et livraison.</p></div></div>
       <Msg text={s.error || msg} /><Loading on={s.loading} />
       <form onSubmit={save}>
         {groups.map(([title, fields]) => (

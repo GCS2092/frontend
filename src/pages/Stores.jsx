@@ -58,7 +58,7 @@ export default function Stores() {
   return (
     <div>
       <div className="page-head">
-        <h1>Boutiques</h1>
+        <div><h1>Boutiques</h1><p className="page-sub">Points de vente, devise et boutique principale.</p></div>
         <button type="button" onClick={openCreate}><Plus size={16} /> Nouvelle boutique</button>
       </div>
       <Msg text={st.error} /><Loading on={st.loading} />
